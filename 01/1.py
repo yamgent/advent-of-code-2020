@@ -1,10 +1,11 @@
 import sys
 
 def main():
-    vals = set([int(x) for x in list(sys.stdin)])
+    vals = {int(x) for x in list(sys.stdin)}
     for v in vals:
-        if 2020 - v in vals:
-            print(str(v * (2020 - v)))
+        w = 2020 - v
+        if w in vals:
+            print(str(v * w))
             return
 
 main()
