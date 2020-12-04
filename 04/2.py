@@ -11,47 +11,33 @@ def val_in_range(val, low, high):
 
 def is_field_valid(key, val):
     if key == 'byr':
-        if not val_in_range(val, 1920, 2002):
-            return False
+        return val_in_range(val, 1920, 2002)
     elif key == 'iyr':
-        if not val_in_range(val, 2010, 2020):
-            return False
+        return val_in_range(val, 2010, 2020)
     elif key == 'eyr':
-        if not val_in_range(val, 2020, 2030):
-            return False
+        return val_in_range(val, 2020, 2030)
     elif key == 'hgt':
         if val.endswith('cm'):
-            if not val_in_range(val[:-2], 150, 193):
-                return False
+            return val_in_range(val[:-2], 150, 193)
         elif val.endswith('in'):
-            if not val_in_range(val[:-2], 59, 76):
-                return False
+            return val_in_range(val[:-2], 59, 76)
         else:
             return False
     elif key == 'hcl':
-        if not HCL_RE.match(val):
-            return False
+        return HCL_RE.match(val)
     elif key == 'ecl':
-        if val not in ECL_SET:
-            return False
+        return val in ECL_SET
     elif key == 'pid':
-        if not PID_RE.match(val):
-            return False
-    return True
+        return PID_RE.match(val)
+    else:
+        return True
 
 
 def is_valid(content):
     entries = [ent.split(':') for ent in ' '.join(content).split(' ')]
     present = {ent[0] for ent in entries}
 
-    if not REQUIRED <= present:
-        return False
-
-    for key, val in entries:
-        if not is_field_valid(key, val):
-            return False
-
-    return True
+    return REQUIRED <= present and all([is_field_valid(key, val) for key, val in entries])
 
 
 def main():
