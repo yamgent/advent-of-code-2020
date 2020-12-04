@@ -41,14 +41,13 @@ def is_field_valid(key, val):
 
 
 def is_valid(content):
-    entries = ' '.join(content).split(' ')
-    present = set(map(lambda ent: ent.split(':')[0], entries))
+    entries = [ent.split(':') for ent in ' '.join(content).split(' ')]
+    present = {ent[0] for ent in entries}
 
     if not REQUIRED <= present:
         return False
 
-    for ent in entries:
-        key, val = ent.split(':')
+    for key, val in entries:
         if not is_field_valid(key, val):
             return False
 

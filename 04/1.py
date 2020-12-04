@@ -1,8 +1,8 @@
 REQUIRED = { 'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid' }
 
 def is_valid(content):
-    entries = ' '.join(content).split(' ')
-    present = set(map(lambda ent: ent.split(':')[0], entries))
+    entries = [ent.split(':') for ent in ' '.join(content).split(' ')]
+    present = {ent[0] for ent in entries}
 
     return REQUIRED <= present
 
