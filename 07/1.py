@@ -35,31 +35,33 @@ class GraphEdge:
 
 class Graph:
     def __init__(self, rules):
-        self.ad_list = {}
+        self.ad_out = {}
         for rule in rules:
             for rinner in rule.inner:
-                if rinner.name not in self.ad_list:
-                    self.ad_list[rinner.name] = []
-                self.ad_list[rinner.name].append(GraphEdge(rule.main, rinner.amount))
+                if rinner.name not in self.ad_out:
+                    self.ad_out[rinner.name] = []
+                self.ad_out[rinner.name].append(GraphEdge(rule.main, rinner.amount))
 
-            if rule.main not in self.ad_list:
-                self.ad_list[rule.main] = []
+            if rule.main not in self.ad_out:
+                self.ad_out[rule.main] = []
 
-    def dfs_collect_nodes(self, start_name):
+    def dfs_p1(self):
         result = set()
 
         def dfs(name):
             if name in result:
                 return
             result.add(name)
-            for edge in self.ad_list[name]:
+            for edge in self.ad_out[name]:
                 dfs(edge.dest)
 
-        dfs(start_name)
-        return result
+        dfs('shiny gold')
+
+        # need to discard shiny gold itself
+        return len(result) - 1
 
     def __repr__(self):
-        return 'Graph(ad_list="{}")'.format(self.ad_list)
+        return 'Graph(ad_out="{}")'.format(self.ad_out)
 
 
 def main():
@@ -69,9 +71,7 @@ def main():
     # print(rules)
     # print(graph)
 
-    # subtract ourselves
-    total_outer = len(graph.dfs_collect_nodes('shiny gold')) - 1
-    print(total_outer)
+    print(graph.dfs_p1())
 
 
 main()
