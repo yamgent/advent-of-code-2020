@@ -1,7 +1,5 @@
 import sys
 
-DELTA = [[1, 0], [0, -1], [-1, 0], [0, 1]]
-
 def add(pos, delta, count):
     return [pos[0] + (delta[0] * count), pos[1] + (delta[1] * count)]
 
@@ -17,7 +15,7 @@ def rot(wp, deg):
 
     return wp
 
-def mat(pos):
+def man(pos):
     return abs(pos[0]) + abs(pos[1])
 
 def main():
@@ -29,13 +27,13 @@ def main():
         char = l[0]
         val = int(l[1:])
         if char == 'N':
-            wp = add(wp, DELTA[3], val)
+            wp = add(wp, [0, 1], val)
         elif char == 'S':
-            wp = add(wp, DELTA[1], val)
+            wp = add(wp, [0, -1], val)
         elif char == 'E':
-            wp = add(wp, DELTA[0], val)
+            wp = add(wp, [1, 0], val)
         elif char == 'W':
-            wp = add(wp, DELTA[2], val)
+            wp = add(wp, [-1, 0], val)
         elif char == 'L':
             deg = int((-val) / 90)
             wp = rot(wp, deg)
@@ -45,7 +43,7 @@ def main():
         elif char == 'F':
             pos = add(pos, wp, val)
 
-    print(str(mat(pos)))
+    print(str(man(pos)))
 
 
 main()

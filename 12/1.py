@@ -13,7 +13,7 @@ def rot(direction, deg):
         direction -= len(DELTA)
     return direction
 
-def mat(pos):
+def man(pos):
     return abs(pos[0]) + abs(pos[1])
 
 def main():
@@ -41,7 +41,7 @@ def main():
         elif char == 'F':
             pos = add(pos, DELTA[direction], val)
 
-    print(str(mat(pos)))
+    print(str(man(pos)))
 
 
 main()
