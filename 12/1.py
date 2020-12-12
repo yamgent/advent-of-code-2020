@@ -2,8 +2,8 @@ import sys
 
 DELTA = [[1, 0], [0, -1], [-1, 0], [0, 1]]
 
-def add(pos, delta, mag):
-    return [pos[0] + (delta[0] * mag), pos[1] + (delta[1] * mag)]
+def add(pos, delta, count):
+    return [pos[0] + (delta[0] * count), pos[1] + (delta[1] * count)]
 
 def rot(direction, deg):
     direction += deg
@@ -12,6 +12,9 @@ def rot(direction, deg):
     while direction >= len(DELTA):
         direction -= len(DELTA)
     return direction
+
+def mat(pos):
+    return abs(pos[0]) + abs(pos[1])
 
 def main():
     lines = [x.strip() for x in sys.stdin]
@@ -38,7 +41,7 @@ def main():
         elif char == 'F':
             pos = add(pos, DELTA[direction], val)
 
-    print(str(abs(pos[0]) + abs(pos[1])))
+    print(str(mat(pos)))
 
 
 main()
