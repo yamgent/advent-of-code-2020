@@ -15,7 +15,7 @@ def extended_gcd(a, b):
 
 
 def crt(buses):
-    a = list(map(lambda bus: -bus[0], buses))
+    a = list(map(lambda bus: bus[0], buses))
     m = list(map(lambda bus: bus[1], buses))
     M = reduce(lambda acc, m_val: acc * m_val, m)
     b = list(map(lambda m_val: M // m_val, m))
@@ -26,7 +26,9 @@ def crt(buses):
 
 def main():
     depart = int(input())
-    buses = [x for x in enumerate([int(x) if x != 'x' else 0 for x in input().split(',')]) if x[1] != 0]
+    # NOTE: time interval must be negative due to how the final equation
+    # is designed in order to apply CRT. Refer to NOTE.md for more details
+    buses = [(-x[0], x[1]) for x in enumerate([int(x) if x != 'x' else 0 for x in input().split(',')]) if x[1] != 0]
     print(crt(buses))
 
 
