@@ -27,7 +27,7 @@ x = -7 (mod 19)
 ```
 
 This form can be solved using the Chinese Remainder Theorem. The algorithm is
-as follows [1]:
+as follows (taken from [1]):
 
 Let `m_1`, ..., `m_n` be pairwise coprime (i.e. `gcd(m_i, m_j) = 1` when
 `i != j`), then the system of `n` equations:
@@ -61,4 +61,5 @@ course notes for extended GCD algorithm, or take the algorithm directly from
 Wikipedia [2].
 
 [1] - https://crypto.stanford.edu/pbc/notes/numbertheory/crt.html
+
 [2] - https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Pseudocode
