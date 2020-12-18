@@ -1,6 +1,5 @@
 import sys
 
-TT_ERROR = -1
 TT_NUM = 0
 TT_PLUS = 1
 TT_MUL = 2
@@ -17,19 +16,24 @@ class Token:
         return 'Token(token_type={}, pos={}, val="{}")'.format(self.token_type, self.pos, self.val)
 
 
-def do_error(line, token):
+def raise_error(line, pos, message):
     print(line)
-    print((' ' * (token.pos)) + '^')
-    print('Error (pos {}): {}'.format(token.pos, token.val))
-    raise Exception(token.val)
+    print((' ' * pos) + '^')
+    print('Error (pos {}): {}'.format(pos, message))
+    raise Exception(message)
 
 
 def lex(line):
     pos = 0
     tokens = []
-    while True:
+
+    def skip_space():
+        nonlocal pos
         while pos < len(line) and line[pos] == ' ':
             pos += 1
+
+    while True:
+        skip_space()
         if pos >= len(line):
             break
 
@@ -52,59 +56,71 @@ def lex(line):
             tokens.append(Token(TT_CLOSE, pos, ')'))
             pos += 1
         else:
-            do_error(line, Token(TT_ERROR, pos, 'Cannot understand symbol {}'.format(line[pos])))
+            raise_error(line, pos, 'Invalid symbol {}'.format(line[pos]))
 
     return tokens
 
 
-def p_brac(line, tokens, i):
-    val, i = p_stat(line, tokens, i)
-    if tokens[i].token_type != TT_CLOSE:
-        do_error(line, Token(TT_ERROR, tokens[i].pos, 'Expected ")"'))
-    return val, i + 1
-
-
-def p_val(line, tokens, i):
-    if tokens[i].token_type == TT_OPEN:
-        return p_brac(line, tokens, i + 1)
-    elif tokens[i].token_type == TT_NUM:
-        return tokens[i].val, i + 1
-    do_error(line, Token(TT_ERROR, tokens[i].pos, 'Expected number or "("'))
-
-
-def p_op(line, tokens, i):
-    if tokens[i].token_type == TT_PLUS or tokens[i].token_type == TT_MUL:
-        return tokens[i], i + 1
-    return Token(TT_ERROR, tokens[i].pos, 'Expected "+" or "*"'), i
-
-
-def p_stat(line, tokens, i):
-    lhs, i = p_val(line, tokens, i)
-
-    while i < len(tokens):
-        op_token, i = p_op(line, tokens, i)
-
-        if op_token.token_type == TT_ERROR:
-            break
-
-        op = op_token.token_type
-        rhs, i = p_val(line, tokens, i)
-
-        if op == TT_PLUS:
-            lhs += rhs
-        elif op == TT_MUL:
-            lhs *= rhs
-        else:
-            raise Exception('Unhandled operator {}'.format(op))
-
-    return lhs, i
-
-
 def parse(line, tokens):
-    ans, pos = p_stat(line, tokens, 0)
-    if pos != len(tokens):
-        do_error(line, Token(TT_ERROR, pos, 'Expected EOF'))
-    return ans
+    idx = 0
+
+    def fatal(message):
+        nonlocal idx
+        raise_error(line, tokens[idx].pos, message)
+
+    def is_type(types):
+        nonlocal idx
+        return tokens[idx].token_type in types
+
+    def must_accept(types, err_message):
+        nonlocal idx
+        if not is_type(types):
+            fatal(err_message)
+        val = tokens[idx]
+        idx += 1
+        return val
+
+    def may_accept(types):
+        nonlocal idx
+        if not is_type(types):
+            return None
+        val = tokens[idx]
+        idx += 1
+        return val
+
+    def has_tokens_left():
+        nonlocal idx
+        return idx < len(tokens)
+
+    def p_brac_expr():
+        must_accept([TT_OPEN], 'Expected "("')
+        val = p_expr()
+        must_accept([TT_CLOSE], 'Expected ")"')
+        return val
+
+    def p_value():
+        if is_type([TT_OPEN]):
+            return p_brac_expr()
+        else:
+            return must_accept([TT_NUM], 'Expected number or "("').val
+
+    def p_expr():
+        res = p_value()
+
+        while has_tokens_left():
+            if may_accept([TT_PLUS]):
+                res += p_value()
+            elif may_accept([TT_MUL]):
+                res *= p_value()
+            else:
+                break
+
+        return res
+
+    res = p_expr()
+    if has_tokens_left():
+        fatal('Expected EOF')
+    return res
 
 
 def main():
