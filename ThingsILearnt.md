@@ -39,6 +39,11 @@
   #   19
   ```
 
+- Lists have `.index()` to find index of an element (it doesn't have `.find()`
+  like javascript though).
+
+- Lists have `.reversed()`
+
 ## Refreshed
 
 - Python regex: Use `r'...'` so that you don't have to escape regular
@@ -58,3 +63,5 @@
 - `int('010101', 2)` to convert binary strings to numbers.
 - `__repr__` to override what `print()` does to an object.
 - Dynamic programming (day 10)
+- `enumerate()`
+- `dict.items()` returns a `(key, value)` tuple.
