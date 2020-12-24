@@ -3,28 +3,20 @@ W, H = 10, 10
 
 # get a unique edge ID for a particular edge
 def gen_edge_uid(pix):
-    # go from left to right
-    ltr = 0
-    cur = 1
-    for i in range(len(pix) - 1, -1, -1):
-        if pix[i] == '#':
-            ltr += cur
-        cur *= 2
+    binary = ['0' if x == '.' else '1' for x in pix]
 
-    # go from right to left
-    rtl = 0
-    cur = 1
-    for i in range(len(pix)):
-        if pix[i] == '#':
-            rtl += cur
-        cur *= 2
+    # standard order
+    normal = int(''.join(binary), 2)
+    # flipped
+    flipped = int(''.join(reversed(binary)), 2)
 
     # always get the smaller of the two
-    # which guarantees uniqueness
-    return min(ltr, rtl)
+    # which guarantees uniqueness for same edges
+    # in different orientation
+    return min(normal, flipped)
 
 
-# represents a single tile. Edge order: T, B, L, R
+# represents a single tile. Edge order: T, R, B, L
 class Tile:
     def __init__(self, tid, pixels):
         self.tid = tid
@@ -34,7 +26,7 @@ class Tile:
         bot_id = gen_edge_uid(list(pixels[H - 1]))
         left_id = gen_edge_uid([pixels[i][0] for i in range(len(pixels))])
         right_id = gen_edge_uid([pixels[i][W - 1] for i in range(len(pixels))])
-        self.edge_uids = [top_id, bot_id, left_id, right_id]
+        self.edge_uids = [top_id, right_id, bot_id, left_id]
         self.edge_tiles = [None] * 4
 
     def __repr__(self):
@@ -75,6 +67,7 @@ def connect_tiles(tiles):
     for tid in tiles:
         for i in range(4):
             edge = tiles[tid].edge_uids[i]
+            # assume that one edge will match at most two tiles
             if len(common_edges[edge]) == 2:
                 other_tid = common_edges[edge][0]
                 if other_tid == tid:
@@ -82,7 +75,7 @@ def connect_tiles(tiles):
                 tiles[tid].edge_tiles[i] = tiles[other_tid]
 
 
-NEXT_EDGE_CHANGE = [1, 0, 3, 2]
+NEXT_EDGE_CHANGE = [2, 3, 0, 1]
 
 def traverse(start_tile, edge_tile_idx):
     res = [start_tile]
@@ -110,7 +103,7 @@ def generate_layout(tiles):
             break
 
     assert corner != None
-    left_column_tiles = traverse(corner, 0 if corner.edge_tiles[0] != None else 1)
+    left_column_tiles = traverse(corner, 0 if corner.edge_tiles[0] != None else 2)
 
     rows = []
     for tile in left_column_tiles:
@@ -136,17 +129,17 @@ ORI_FLIP_270 = 7
 
 # rotate CW 90 degrees
 def rotate_edge_tiles(edge_tiles):
-    return [edge_tiles[2], edge_tiles[3], edge_tiles[1], edge_tiles[0]]
+    return [edge_tiles[-1]] + edge_tiles[:-1]
 
 
 # get orientation of the pixels given the four neighbour tiles
 def get_orientation(layout, y, x):
-    # T B L R
+    # T R B L
     neighbours = [
         None if y - 1 < 0 else layout[y - 1][x],
+        None if x + 1 >= len(layout[y]) else layout[y][x + 1],
         None if y + 1 >= len(layout) else layout[y + 1][x],
-        None if x - 1 < 0 else layout[y][x - 1],
-        None if x + 1 >= len(layout[y]) else layout[y][x + 1]
+        None if x - 1 < 0 else layout[y][x - 1]
         ]
     cur = list(layout[y][x].edge_tiles)
 
@@ -166,7 +159,7 @@ def get_orientation(layout, y, x):
         return ORI_270
 
     cur = list(layout[y][x].edge_tiles)
-    cur[0], cur[1] = cur[1], cur[0]
+    cur[0], cur[2] = cur[2], cur[0]
     if neighbours == cur:
         return ORI_FLIP
 
@@ -211,8 +204,7 @@ def rotate_flip_pixels(pixels, orientation):
         res.append(row)
 
     if orientation in [ORI_FLIP, ORI_FLIP_90, ORI_FLIP_180, ORI_FLIP_270]:
-        for i in range(len(res) // 2):
-            res[i], res[-(i + 1)] = res[-(i + 1)], res[i]
+        res = list(reversed(res))
     return res
 
 
@@ -284,7 +276,7 @@ def main():
     for orient in [ORI_NORM, ORI_90, ORI_180, ORI_270, ORI_FLIP, ORI_FLIP_90, ORI_FLIP_180, ORI_FLIP_270]:
         monsters = count_monsters(rotate_flip_pixels(image, orient))
         if monsters > 0:
-            print(str(count_hashes(image) - monsters * 15))
+            print(str(count_hashes(image) - monsters * count_hashes(MONSTER)))
             return
 
 
