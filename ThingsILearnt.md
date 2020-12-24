@@ -24,7 +24,6 @@
 
 - List comprehensions are eagerly evaluated, `map`/`filter` are lazily
   evaluated (need `list()`).
-
 - You can do a javascript's `forEach()` with a list comprehension:
 
   ```python
@@ -41,8 +40,9 @@
 
 - Lists have `.index()` to find index of an element (it doesn't have `.find()`
   like javascript though).
-
 - Lists have `.reversed()`
+- Shunting-Yard algorithm (day 18) (alternative algo, not implemented)
+- Cocke-Younger-Kasami algorithm (day 19)
 
 ## Refreshed
 
