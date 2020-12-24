@@ -58,21 +58,20 @@ def parse_input():
 # edge comparison can be done using the unique edge ids
 def connect_tiles(tiles):
     common_edges = {}
-    for tid in tiles:
-        for edge in tiles[tid].edge_uids:
+    for tid, tile in tiles.items():
+        for edge in tile.edge_uids:
             if edge not in common_edges:
                 common_edges[edge] = []
             common_edges[edge].append(tid)
 
-    for tid in tiles:
-        for i in range(4):
-            edge = tiles[tid].edge_uids[i]
+    for tid, tile in tiles.items():
+        for i, edge in enumerate(tile.edge_uids):
             # assume that one edge will match at most two tiles
             if len(common_edges[edge]) == 2:
                 other_tid = common_edges[edge][0]
                 if other_tid == tid:
                     other_tid = common_edges[edge][1]
-                tiles[tid].edge_tiles[i] = tiles[other_tid]
+                tile.edge_tiles[i] = tiles[other_tid]
 
 
 NEXT_EDGE_CHANGE = [2, 3, 0, 1]
@@ -96,22 +95,13 @@ def traverse(start_tile, edge_tile_idx):
 # generate the layout given the connected tiles
 def generate_layout(tiles):
     # find any corner tiles
-    corner = None
-    for tid in tiles:
-        if tiles[tid].edge_tiles.count(None) == 2:
-            corner = tiles[tid]
-            break
-
-    assert corner != None
+    corner = [tile for tid, tile in tiles.items() if tile.edge_tiles.count(None) == 2][0]
     left_column_tiles = traverse(corner, 0 if corner.edge_tiles[0] != None else 2)
 
     rows = []
     for tile in left_column_tiles:
-        neighbour_idx = -1
-        for i in range(len(tile.edge_tiles)):
-            if tile.edge_tiles[i] not in left_column_tiles and tile.edge_tiles[i] is not None:
-                neighbour_idx = i
-                break
+        neighbour_idx = [i for i, edge_tile in enumerate(tile.edge_tiles)
+            if edge_tile not in left_column_tiles and edge_tile is not None][0]
         rows.append(traverse(tile, neighbour_idx))
 
     return rows
